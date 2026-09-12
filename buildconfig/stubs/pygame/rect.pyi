@@ -23,9 +23,7 @@ _K = TypeVar("_K")
 _V = TypeVar("_V")
 _T = TypeVar("_T")
 
-_RectTypeCompatible_co = TypeVar(
-    "_RectTypeCompatible_co", bound=RectLike, covariant=True
-)
+_RectLike_co = TypeVar("_RectLike_co", bound=RectLike, covariant=True)
 
 class _GenericRect(Collection[_N]):
     """Pygame object for storing rectangular coordinates.
@@ -304,9 +302,9 @@ class _GenericRect(Collection[_N]):
         Same as the ``Rect.inflate()`` method, but operates in place.
         """
     @overload
-    def scale_by(self, x: float, y: float = ...) -> Self: ...
+    def scale_by(self, x: float, y: float) -> Self: ...
     @overload
-    def scale_by(self, scale_by: Point) -> Self:
+    def scale_by(self, scale_by: Point | float) -> Self:
         """Scale the rectangle by given a multiplier.
 
         Returns a new rectangle with the size scaled by the given multipliers.
@@ -332,13 +330,11 @@ class _GenericRect(Collection[_N]):
         .. versionchanged:: 2.5.2 the argument ``scale_by`` can now be passed as a positional argument
         """
     @overload
-    def update(
-        self, left: float, top: float, width: float, height: float, /
-    ) -> None: ...
+    def update(self, rect: RectLike, /) -> None: ...
     @overload
     def update(self, left_top: Point, width_height: Point, /) -> None: ...
     @overload
-    def update(self, single_arg: RectLike, /) -> None:
+    def update(self, left: float, top: float, width: float, height: float, /) -> None:
         """Sets the position and size of the rectangle.
 
         Sets the position and size of the rectangle, in place. See
@@ -382,7 +378,7 @@ class _GenericRect(Collection[_N]):
         """
     @overload
     def clipline(
-        self, x1: float, x2: float, x3: float, x4: float, /
+        self, x1: float, y1: float, x2: float, y2: float, /
     ) -> tuple[tuple[_N, _N], tuple[_N, _N]] | tuple[()]: ...
     @overload
     def clipline(
@@ -390,7 +386,7 @@ class _GenericRect(Collection[_N]):
     ) -> tuple[tuple[_N, _N], tuple[_N, _N]] | tuple[()]: ...
     @overload
     def clipline(
-        self, rect_arg: RectLike, /
+        self, rect: RectLike, /
     ) -> tuple[tuple[_N, _N], tuple[_N, _N]] | tuple[()]:
         """Crops a line inside a rectangle.
 
@@ -461,12 +457,12 @@ class _GenericRect(Collection[_N]):
 
         Same as the ``Rect.union()`` method, but operates in place.
         """
-    def unionall(self, rect: SequenceLike[_RectTypeCompatible_co], /) -> Self:
+    def unionall(self, rects: SequenceLike[_RectLike_co], /) -> Self:
         """The union of many rectangles.
 
         Returns the union of one rectangle with a sequence of many rectangles.
         """
-    def unionall_ip(self, rect: SequenceLike[_RectTypeCompatible_co], /) -> None:
+    def unionall_ip(self, rects: SequenceLike[_RectLike_co], /) -> None:
         """The union of many rectangles, in place.
 
         The same as the ``Rect.unionall()`` method, but operates in place.
@@ -506,7 +502,7 @@ class _GenericRect(Collection[_N]):
     @overload
     def collidepoint(self, x: float, y: float, /) -> bool: ...
     @overload
-    def collidepoint(self, x_y: Point, /) -> bool:
+    def collidepoint(self, point: Point, /) -> bool:
         """Test if a point is inside a rectangle.
 
         Returns true if the given point is inside the rectangle. A point along
@@ -533,16 +529,14 @@ class _GenericRect(Collection[_N]):
             For collision detection between a rect and a line the :meth:`clipline`
             method can be used.
         """
-    def collidelist(self, rect_list: SequenceLike[_RectTypeCompatible_co], /) -> int:
+    def collidelist(self, rects: SequenceLike[_RectLike_co], /) -> int:
         """Test if one rectangle in a list intersects.
 
         Test whether the rectangle collides with any in a sequence of rectangles.
         The index of the first collision found is returned. If no collisions are
         found an index of -1 is returned.
         """
-    def collidelistall(
-        self, rect_list: SequenceLike[_RectTypeCompatible_co], /
-    ) -> list[int]:
+    def collidelistall(self, rects: SequenceLike[_RectLike_co], /) -> list[int]:
         """Test if all rectangles in a list intersect.
 
         Returns a list of all the indices that contain rectangles that collide
@@ -707,13 +701,13 @@ class _GenericRect(Collection[_N]):
     @overload
     def collidedict(
         self,
-        rect_dict: dict[_RectTypeCompatible_co, _V],
+        rect_dict: dict[_RectLike_co, _V],
         values: Literal[False] = False,
-    ) -> tuple[_RectTypeCompatible_co, _V] | None: ...
+    ) -> tuple[_RectLike_co, _V] | None: ...
     @overload
     def collidedict(
-        self, rect_dict: dict[_K, _RectTypeCompatible_co], values: Literal[True]
-    ) -> tuple[_K, _RectTypeCompatible_co] | None:
+        self, rect_dict: dict[_K, _RectLike_co], values: Literal[True]
+    ) -> tuple[_K, _RectLike_co] | None:
         """Test if one rectangle in a dictionary intersects.
 
         Returns the first key and value pair that intersects with the calling
@@ -734,13 +728,13 @@ class _GenericRect(Collection[_N]):
     @overload
     def collidedictall(
         self,
-        rect_dict: dict[_RectTypeCompatible_co, _V],
+        rect_dict: dict[_RectLike_co, _V],
         values: Literal[False] = False,
-    ) -> list[tuple[_RectTypeCompatible_co, _V]]: ...
+    ) -> list[tuple[_RectLike_co, _V]]: ...
     @overload
     def collidedictall(
-        self, rect_dict: dict[_K, _RectTypeCompatible_co], values: Literal[True]
-    ) -> list[tuple[_K, _RectTypeCompatible_co]]:
+        self, rect_dict: dict[_K, _RectLike_co], values: Literal[True]
+    ) -> list[tuple[_K, _RectLike_co]]:
         """Test if all rectangles in a dictionary intersect.
 
         Returns a list of all the key and value pairs that intersect with the
@@ -759,7 +753,7 @@ class _GenericRect(Collection[_N]):
             will be valid.
         """
 
-# Rect confirms to the Collection ABC, since it also confirms to
+# Rect conforms to the Collection ABC, since it also conforms to
 # Sized, Iterable and Container ABCs
 class Rect(_GenericRect[int]): ...
 class FRect(_GenericRect[float]): ...
